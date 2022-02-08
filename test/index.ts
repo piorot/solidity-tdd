@@ -69,7 +69,7 @@ describe("Apartment", function () {
   })
 
 
-  it("Shareholder be able to withdraw resources paid as rent", async () => {
+  it("Apartment shareholder be able to withdraw resources paid as rent", async () => {
     const Apartment = await ethers.getContractFactory("Apartment");
     const apartment = await Apartment.deploy();
 
@@ -89,15 +89,20 @@ describe("Apartment", function () {
   
   })
 
+  it("Attempt to withdraw by non shareholder should be reverted", async () => {
+    const Apartment = await ethers.getContractFactory("Apartment");
+    const apartment = await Apartment.deploy();
+
+    [owner, Alice, Bob] = await ethers.getSigners();
+
+    await apartment.deployed();
+    await apartment.transfer(Alice.address, 20);
+
+    await Bob.sendTransaction({
+      to: apartment.address,
+      value: ethers.utils.parseEther("1")
+    });
     
+    await expect(apartment.connect(Bob).withdraw()).to.be.revertedWith("unauthorized");
   })
-
-
-
-
-
-
-
-
-
 });
