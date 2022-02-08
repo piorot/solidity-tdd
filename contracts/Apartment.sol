@@ -14,6 +14,7 @@ contract Apartment is ERC20 {
     }
 
     function withdraw() public {
+        require(this.balanceOf(msg.sender) > 0, "XXX");
         payable(msg.sender).transfer(address(this).balance);
     }
 
