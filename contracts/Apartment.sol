@@ -6,10 +6,17 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract Apartment is ERC20 {
     
-
+    uint public balance;
     constructor() ERC20("ApartmentContract", "APRTM") {
         super._mint(_msgSender(), 100);
         console.log("Deploying a Greeter with greeting:");
        
+    }
+
+ 
+
+    receive() external payable {
+        console.log("receive");
+        balance += msg.value;
     }
 }

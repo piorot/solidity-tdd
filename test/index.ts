@@ -31,7 +31,27 @@ describe("Apartment", function () {
     expect(await apartment.balanceOf(owner.address)).to.equal(80);
   })
 
-  
+
+  it("It should be possible to pay the rent and deposit it in ether in the apartment contract", async () => {
+    const Apartment = await ethers.getContractFactory("Apartment");
+    const apartment = await Apartment.deploy();
+
+    [owner, Alice, Bob] = await ethers.getSigners();
+
+    await apartment.deployed();
+
+    await Bob.sendTransaction({
+      to: apartment.address,
+      value: ethers.utils.parseEther("1")
+    })
+
+    expect(await apartment.balance()).to.equal(ethers.utils.parseEther("1"));
+
+    
+    
+  })
+
+
 
 
 
