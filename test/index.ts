@@ -46,10 +46,39 @@ describe("Apartment", function () {
     })
 
     expect(await apartment.balance()).to.equal(ethers.utils.parseEther("1"));
+  })
+
+
+  it("Owner should be able to withdraw resources paid as rent", async () => {
+    const Apartment = await ethers.getContractFactory("Apartment");
+    const apartment = await Apartment.deploy();
+
+    [owner, Alice, Bob] = await ethers.getSigners();
+
+    await apartment.deployed();
+    await apartment.transfer(Alice.address, 20);
+
+    await Bob.sendTransaction({
+      to: apartment.address,
+      value: ethers.utils.parseEther("1")
+    });
+
+    const ownerBalanceBeforeWithdrawal = await owner.getBalance();
+    await apartment.withdraw();
+
+    expect(await (await owner.getBalance()).gt(ownerBalanceBeforeWithdrawal)).to.be.true;
+
+
+
+
+    
 
     
     
   })
+
+
+
 
 
 

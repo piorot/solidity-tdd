@@ -13,10 +13,14 @@ contract Apartment is ERC20 {
        
     }
 
- 
+    function withdraw() public {
+        payable(msg.sender).transfer(address(this).balance);
+    }
 
     receive() external payable {
         console.log("receive");
         balance += msg.value;
     }
+
+    
 }
