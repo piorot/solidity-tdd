@@ -177,6 +177,60 @@ describe("Apartment", function () {
   })
 
 
+  it("Each withdrawal should be calculated against new income, not total balance", async () => {
+    const Apartment = await ethers.getContractFactory("Apartment");
+    const apartment = await Apartment.deploy();
+
+    [owner, Alice, Bob] = await ethers.getSigners();
+
+    await apartment.deployed();
+    await apartment.transfer(Alice.address, 20);
+
+    //Alice balance saved for later comparison
+    const aliceInitialBalanceBeforeWithdrawals = await Alice.getBalance();
+
+    
+    //1.
+    //Bob transfers his rent
+    await Bob.sendTransaction({
+      to: apartment.address,
+      value: ethers.utils.parseEther("1")
+    });
+    
+    //Alice makes a withdrawal (20/100 * 1E) =~0.2E
+    await apartment.connect(Alice).withdraw();
+    //Alice account saved after withdrawal for comparison
+    const aliceBalanceAfterFirstWithdrawal = await Alice.getBalance();
+
+    //2.
+    //Bob transfers his rent
+    await Bob.sendTransaction({
+      to: apartment.address,
+      value: ethers.utils.parseEther("1")
+    });
+    //Alice makes withdrawal (20/10 * newIncome(1E)) =~0.2E
+    await apartment.connect(Alice).withdraw();
+    //Alice account after all withdrawals saved for comparison
+    const aliceBalanceAfterSecondWithdrawal = await Alice.getBalance();
+    
+
+
+    expect(aliceInitialBalanceBeforeWithdrawals.lt(aliceBalanceAfterFirstWithdrawal)).to.be.true;
+    expect(aliceBalanceAfterFirstWithdrawal.lt(aliceBalanceAfterSecondWithdrawal)).to.be.true;
+
+    //apartmane balance should be following
+    // 1E after Bob pays rent
+    // 0.8E after Alice withdraws
+    // 1.8E after Bob pays rent second time
+    // 1.6 after Alice withdraws rent second time
+    expect((await apartment.balance()).eq(ethers.utils.parseEther("1.6"))).to.be.true;
+
+    
+    
+
+  })
+
+
 
 
 });

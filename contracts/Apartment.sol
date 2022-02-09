@@ -19,7 +19,7 @@ contract Apartment is ERC20 {
     function withdraw() public {
         require(this.balanceOf(msg.sender) > 0, "unauthorized");
         require(totalIncome > withdrawRegister[msg.sender], "0 funds to withdraw");
-        uint meansToWithdraw = address(this).balance / 100 * this.balanceOf(msg.sender);
+        uint meansToWithdraw = (totalIncome - withdrawRegister[msg.sender]) / 100 * this.balanceOf(msg.sender);
         balance = balance - meansToWithdraw;
         withdrawRegister[msg.sender] = totalIncome;
         payable(msg.sender).transfer(meansToWithdraw);
