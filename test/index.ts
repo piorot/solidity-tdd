@@ -150,9 +150,30 @@ describe("Apartment", function () {
     await apartment.connect(Alice).withdraw();
     await expect(apartment.connect(Alice).withdraw()).to.be.revertedWith("0 funds to withdraw");
    
+  })
+
+  it("It should be possible to withdraw multiple times provided there were incomes in between", async () => {
+    const Apartment = await ethers.getContractFactory("Apartment");
+    const apartment = await Apartment.deploy();
+
+    [owner, Alice, Bob] = await ethers.getSigners();
+
+    await apartment.deployed();
+    await apartment.transfer(Alice.address, 20);
+
+    await Bob.sendTransaction({
+      to: apartment.address,
+      value: ethers.utils.parseEther("1")
+    });
     
-
-
+   
+    await apartment.connect(Alice).withdraw();
+    await Bob.sendTransaction({
+      to: apartment.address,
+      value: ethers.utils.parseEther("1")
+    });
+    await expect(apartment.connect(Alice).withdraw()).not.to.be.revertedWith("0 funds to withdraw");
+   
   })
 
 
