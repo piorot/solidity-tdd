@@ -105,4 +105,34 @@ describe("Apartment", function () {
     
     await expect(apartment.connect(Bob).withdraw()).to.be.revertedWith("unauthorized");
   })
+
+  it("Apartment shareholder be able to withdraw resources proportional to his share", async () => {
+    const Apartment = await ethers.getContractFactory("Apartment");
+    const apartment = await Apartment.deploy();
+
+    [owner, Alice, Bob] = await ethers.getSigners();
+
+    await apartment.deployed();
+    await apartment.transfer(Alice.address, 20);
+
+    await Bob.sendTransaction({
+      to: apartment.address,
+      value: ethers.utils.parseEther("1")
+    });
+    
+    const aliceBalanceBeforeWithdrawal = await Alice.getBalance();
+
+    await apartment.connect(Alice).withdraw();
+    expect(await (await apartment.balance()).eq(ethers.utils.parseEther("0.8"))).to.be.true;
+    expect(await (await apartment.balance()).gt(ethers.utils.parseEther("0"))).to.be.true;
+    expect(await (await Alice.getBalance()).gt(aliceBalanceBeforeWithdrawal)).to.be.true;
+
+    
+
+
+  })
+
+
+
+
 });

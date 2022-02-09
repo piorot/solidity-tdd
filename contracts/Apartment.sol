@@ -15,11 +15,12 @@ contract Apartment is ERC20 {
 
     function withdraw() public {
         require(this.balanceOf(msg.sender) > 0, "unauthorized");
-        payable(msg.sender).transfer(address(this).balance);
+        uint meansToWithdraw = address(this).balance / 100 * this.balanceOf(msg.sender);
+        balance = balance - meansToWithdraw;
+        payable(msg.sender).transfer(meansToWithdraw);
     }
 
     receive() external payable {
-        console.log("receive");
         balance += msg.value;
     }
 
