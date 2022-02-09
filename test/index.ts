@@ -132,6 +132,29 @@ describe("Apartment", function () {
 
   })
 
+  it("It should not be possible to withdraw more than one should", async () => {
+    const Apartment = await ethers.getContractFactory("Apartment");
+    const apartment = await Apartment.deploy();
+
+    [owner, Alice, Bob] = await ethers.getSigners();
+
+    await apartment.deployed();
+    await apartment.transfer(Alice.address, 20);
+
+    await Bob.sendTransaction({
+      to: apartment.address,
+      value: ethers.utils.parseEther("1")
+    });
+    
+   
+    await apartment.connect(Alice).withdraw();
+    await expect(apartment.connect(Alice).withdraw()).to.be.revertedWith("0 funds to withdraw");
+   
+    
+
+
+  })
+
 
 
 
