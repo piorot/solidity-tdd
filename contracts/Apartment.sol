@@ -5,30 +5,58 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract Apartment is ERC20 {
-    
-    uint public balance;
-    uint public totalIncome;
-    mapping(address => uint) withdrawRegister;
+    uint256 public balance;
+    uint256 public totalIncome;
+    mapping(address => uint256) withdrawRegister;
 
     constructor() ERC20("ApartmentContract", "APRTM") {
         super._mint(_msgSender(), 100);
         console.log("Deploying a Greeter with greeting:");
-       
+
     }
 
     function withdraw() public {
-        require(this.balanceOf(msg.sender) > 0, "unauthorized");
-        require(totalIncome > withdrawRegister[msg.sender], "0 funds to withdraw");
-        uint meansToWithdraw = (totalIncome - withdrawRegister[msg.sender]) / 100 * this.balanceOf(msg.sender);
-        balance = balance - meansToWithdraw;
-        withdrawRegister[msg.sender] = totalIncome;
-        payable(msg.sender).transfer(meansToWithdraw);
+        withdraw(msg.sender);
     }
 
-    receive() external payable {
-        balance += msg.value;
-        totalIncome +=msg.value;
+    function withdraw(address recipient) private {
+        require(this.balanceOf(recipient) > 0, "unauthorized");
+        require(getFundsToWithdraw(recipient) > 0,
+            "0 funds to withdraw"
+        );
+        uint fundsToWithdraw = getFundsToWithdraw(recipient);
+        balance = balance - fundsToWithdraw;
+        withdrawRegister[recipient] = totalIncome;
+        payable(recipient).transfer(fundsToWithdraw);
+    }
+
+    function transfer(address recipient, uint amount)
+        public
+        virtual
+        override
+        returns (bool)
+    {
+        if(getFundsToWithdraw(recipient) > 0){
+            console.log(getFundsToWithdraw(recipient));
+            withdraw(recipient); 
+        }
+        if(getFundsToWithdraw(msg.sender) > 0){
+            withdraw(msg.sender); 
+        }
+
+        super.transfer(recipient, amount);
+        return true;
+    }
+
+    function getFundsToWithdraw(address recipient) public view returns(uint){
+        return (totalIncome -
+            withdrawRegister[recipient]) * this.balanceOf(recipient) / 100;
     }
 
     
+
+    receive() external payable {
+        balance += msg.value;
+        totalIncome += msg.value;
+    }
 }
